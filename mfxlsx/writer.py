@@ -1,89 +1,26 @@
-"""Write MacroFactor Workouts program files (.xlsx) for Import From File.
-
-See FORMAT.md for the format. Minimal use:
-
-    from mfxlsx.writer import Program, Day, Exercise, Set, write
-    day = Day("Monday", [Exercise("Low Incline Dumbbell Press", sets=[Set(reps="8 - 12", rir=2)] * 2)])
-    write(Program("My Program", cycles=4, days=[day, "Rest", ...]), "my-program.xlsx")
-
-Per-cycle variation: any Set field may be a function of the cycle number (1-based),
-for example rir=lambda c: 3 if c <= 2 else 1.
-"""
+"""Write MacroFactor Workouts program files (.xlsx). Layout: see FORMAT.md."""
 from __future__ import annotations
-
-from dataclasses import dataclass, field
-from typing import Any, Callable, Union
 
 import openpyxl
 from openpyxl.styles import Alignment, Font
 from openpyxl.utils import get_column_letter
 
+from .model import DEFAULT_SET_FIELDS, Day, Program
+
 SHEET = "Training Programs"
 SUPERSET_MARK = "∈"  # "∈"; members are named "<exercise> ∈ SS<n>"
-SET_FIELDS = ["Type", "Rep Range", "RIR", "Rest", "Duration", "Distance"]
-
-Value = Union[str, int, float, None, Callable[[int], Any]]
+_WIDTH = {"Type": 18.29, "Rep Range": 16.28, "RIR": 9.68, "Rest": 10.76, "Duration": 10.0, "Distance": 10.0}
 
 
-@dataclass
-class Set:
-    type: Value = "Standard Set"
-    reps: Value = None  # "8 - 12" (range) or e.g. "10"
-    rir: Value = None
-    rest: Value = None
-    duration: Value = None
-    distance: Value = None
-
-    def values(self, cycle: int) -> dict:
-        raw = {"Type": self.type, "Rep Range": self.reps, "RIR": self.rir, "Rest": self.rest,
-               "Duration": self.duration, "Distance": self.distance}
-        return {k: (v(cycle) if callable(v) else v) for k, v in raw.items()}
+def superset_name(name: str, n: int | None) -> str:
+    return name if n is None else f"{name} {SUPERSET_MARK} SS{n}"
 
 
-@dataclass
-class Exercise:
-    name: str
-    sets: list[Set]
-    notes: str | None = None
-    skipped: bool = False
-    superset: int | None = None  # exercises sharing a number on one day form a superset
-
-
-@dataclass
-class Day:
-    name: str  # e.g. "Monday"
-    exercises: list[Exercise]
-    gym: str | None = None  # defaults to Program.gym
-
-
-@dataclass
-class Block:
-    days: list[Union[Day, str]]  # "Rest" for a rest day
-    name: str | None = None  # defaults to "Block <n>"
-
-
-@dataclass
-class Program:
-    name: str
-    cycles: int
-    days: list[Union[Day, str]] = field(default_factory=list)  # shorthand for a single block
-    blocks: list[Block] = field(default_factory=list)
-    deload: str = "Last Cycle"
-    color: str = "Orange"
-    icon: str = "Chess Queen"
-    gym: str = "Home Gym"
-    set_fields: list[str] | None = None  # per-set columns; default: Type, Rep Range, RIR, Rest
-    metadata_extra: list[str] = field(default_factory=list)  # extra row-1 cells, for experiments
-
-
-def _blocks(p: Program) -> list[Block]:
-    return p.blocks or [Block(p.days)]
-
-
-def write(p: Program, out) -> None:
-    blocks = _blocks(p)
-    fields = p.set_fields or SET_FIELDS[:4]
-    max_sets = max((len(e.sets) for b in blocks for d in b.days if isinstance(d, Day) for e in d.exercises), default=1)
+def to_workbook(p: Program) -> openpyxl.Workbook:
+    blocks = p.all_blocks()
+    fields = p.set_fields or DEFAULT_SET_FIELDS
+    max_sets = max((len(e.cycle(c).sets) for b in blocks for d in b.days if isinstance(d, Day)
+                    for e in d.exercises for c in range(1, p.cycles + 1)), default=1)
 
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -115,22 +52,33 @@ def write(p: Program, out) -> None:
                     continue
                 start = row
                 for ex in day.exercises:
-                    name = ex.name if ex.superset is None else f"{ex.name} {SUPERSET_MARK} SS{ex.superset}"
-                    ws.cell(row, 2, name)
-                    ws.cell(row, 3, "Yes" if ex.skipped else "No")
-                    if ex.notes:
-                        ws.cell(row, 4, ex.notes)
-                    for si, st in enumerate(ex.sets):
-                        vals = st.values(cycle)
+                    ec = ex.cycle(cycle)
+                    ws.cell(row, 2, superset_name(ex.name, ex.superset))
+                    ws.cell(row, 3, "Yes" if ec.skipped else "No")
+                    if ec.notes:
+                        ws.cell(row, 4, ec.notes)
+                    for si, st in enumerate(ec.sets):
                         for fi, f in enumerate(fields):
-                            if vals.get(f) is not None:
-                                ws.cell(row, 5 + si * len(fields) + fi, vals[f])
+                            v = st.get(f)
+                            if v is not None:
+                                ws.cell(row, 5 + si * len(fields) + fi, v)
                     row += 1
                 ws.cell(start, 1, f"{day.name} @ {day.gym or p.gym}").alignment = Alignment(vertical="top")
                 if row - 1 > start:
                     ws.merge_cells(start_row=start, start_column=1, end_row=row - 1, end_column=1)
 
-    widths = [21.79, 41.16, 17.89, 14.53] + [18.29, 16.28, 9.68, 10.76, 10.0, 10.0][: len(fields)] * max_sets
+    widths = [21.79, 41.16, 17.89, 14.53] + [_WIDTH[f] for f in fields] * max_sets
     for i, w in enumerate(widths, 1):
         ws.column_dimensions[get_column_letter(i)].width = w
+    return wb
+
+
+def write(p: Program, out, validate: bool = True) -> None:
+    """Write `p` to `out`. With validate=True, refuse to write a file that has errors."""
+    wb = to_workbook(p)
+    if validate:
+        from .reader import read_workbook
+        res = read_workbook(wb)
+        if res.errors:
+            raise ValueError("refusing to write an invalid program:\n" + "\n".join(map(str, res.errors)))
     wb.save(out)

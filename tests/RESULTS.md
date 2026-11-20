@@ -3,7 +3,7 @@
 Build the pack: `python tests/build_pack.py --gym "<your gym name>" --out pack/`.
 Import each file in MacroFactor Workouts (+ > New Program > Import From File), record what happens, then delete the test program.
 
-App version: MacroFactor Workouts 1.4.5 (Android)
+App version: MacroFactor Workouts 1.4.5 (Android, com.sbs.train, version code 160)
 
 | Test | Question | Result | What the app showed |
 |---|---|---|---|

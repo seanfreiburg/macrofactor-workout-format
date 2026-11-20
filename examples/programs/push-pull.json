@@ -1,0 +1,24 @@
+{
+  "name": "Push Pull Example",
+  "cycles": 4,
+  "deload": "Last Cycle",
+  "color": "Orange",
+  "icon": "Chess Queen",
+  "gym": "Home Gym",
+  "days": [
+    {"name": "Monday", "exercises": [
+      {"name": "Low Incline Dumbbell Press", "superset": 1, "sets": [
+        {"reps": "8 - 12", "rir": [3, 2, 1, 1]}, {"reps": "8 - 12", "rir": [3, 2, 1, 1]}]},
+      {"name": "Wide Grip Cable Lat Pulldown", "superset": 1, "notes": "Neutral grip", "sets": [
+        {"reps": "8 - 12", "rir": [3, 2, 1, 1]}, {"reps": "8 - 12", "rir": [3, 2, 1, 1]}]},
+      {"name": "Lever-Arm Machine Belt Squat", "sets": [
+        {"reps": "8 - 12", "rir": 2}, {"reps": "8 - 12", "rir": 2}]}
+    ]},
+    "Rest",
+    {"name": "Wednesday", "exercises": [
+      {"name": "Cambered Bar Bench Press", "sets": [{"reps": "6 - 10", "rir": 2}, {"reps": "6 - 10", "rir": 2}]},
+      {"name": "Neutral Grip Cable Row", "sets": [{"reps": "10 - 15", "rir": 1}, {"reps": "10 - 15", "rir": 1}]}
+    ]},
+    "Rest", "Rest", "Rest", "Rest"
+  ]
+}
