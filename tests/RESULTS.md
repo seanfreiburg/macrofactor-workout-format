@@ -1,7 +1,7 @@
 # Import test results
 
 Build the pack: `python tests/build_pack.py --gym "<your gym name>" --out pack/`.
-Import each file in MacroFactor Workouts (+ > New Program > Import From File), record what happens, then delete the test program.
+Import each file in MacroFactor Workouts (+ > New Program > Import From File) and record what happens. If it imports, export it again (Program Settings > Export Program) and run `python -m mfxlsx compare <sent>.xlsx <re-export>.xlsx` to see what the app changed. Then delete the test program.
 
 App version: MacroFactor Workouts 1.4.5 (Android, com.sbs.train, version code 160)
 
@@ -21,3 +21,11 @@ App version: MacroFactor Workouts 1.4.5 (Android, com.sbs.train, version code 16
 | T11 Skipped/RIR | `Skipped: Yes`; RIR left blank | | |
 | T12 Unknown exercise | What error does an unknown name give? (expected to fail) | | |
 | T13 Unknown gym | What happens with a gym name that doesn't exist? | | |
+
+## Confirmed round trips
+
+Files we generated, imported in the app, and exported again. `compare` output is kept in `examples/roundtrip/`.
+
+| Date | App | File | Imported | What the app changed (from `compare`) |
+|---|---|---|---|---|
+| 2026-11-20 | 1.4.5 Android | `examples/roundtrip/full-body-sent.xlsx` (5 days, 6 cycles, 2 sets, notes, 36 exercises) | Yes | Renamed `Reverse Cable Crossover` to `Bent-Over Cable Fly` (alias). Everything else kept. The program-name change and the SS1 superset were edits made in the app before exporting. |

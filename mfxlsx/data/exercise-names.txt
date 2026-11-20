@@ -1,0 +1,39 @@
+# Exercise names seen in real MacroFactor Workouts exports (app 1.4.5, Android).
+# The app wrote these itself, so the spelling is exactly what it accepts on import.
+# Names marked 'not-in-library-snapshot' were absent from a February 2026 copy of the
+# app's built-in exercise list. They may be custom exercises in the exporting account
+# or newer library entries; another account may not have them.
+# Format: one name per line; text after '#' is a note.
+
+Barbell Back Squat
+Barbell Romanian Deadlift
+Barbell Straight-Leg Deadlift
+Bent-Over Cable Fly
+Cable V-Bar Overhead Triceps Extension  # not-in-library-snapshot
+Cable V-Bar Triceps Pushdown
+Cambered Bar Bench Press
+Chest-Supported Dumbbell Row (Elbows-In)  # not-in-library-snapshot
+Deficit Push-Up
+Dual Cable Bayesian Curl
+Dumbbell Upright Row
+Facing-Up Incline Dumbbell Y-Raise
+Incline Dumbbell Biceps Curl
+Lean-In Dumbbell Lateral Raise
+Lever-Arm Machine Belt Squat
+Low Incline Barbell Press
+Low Incline Dumbbell Fly
+Low Incline Dumbbell Press
+Lying Plate-Loaded Hamstring Curl  # not-in-library-snapshot
+Lying Single Leg Plate-Loaded Hamstring Curl  # not-in-library-snapshot
+Neutral Grip Band-Assisted Pull-Up
+Neutral Grip Cable Rear Delt Fly
+Neutral Grip Cable Row  # not-in-library-snapshot
+Plate-Loaded Leg Extension  # not-in-library-snapshot
+Seated Cable Fly
+Single Arm Behind-The-Back Cable Lateral Raise  # not-in-library-snapshot
+Single Arm Dumbbell Preacher Curl
+Single Arm High Cable Lateral Raise
+Standing Dumbbell Biceps Curl
+Standing Dumbbell Lateral Raise
+Underhand Grip Cable Lat Pulldown
+Wide Grip Cable Lat Pulldown  # not-in-library-snapshot

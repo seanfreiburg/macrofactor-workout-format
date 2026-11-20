@@ -33,9 +33,11 @@ pip install -r requirements.txt
 
 python -m mfxlsx validate program.xlsx                 # errors and warnings, exit 1 if invalid
 python -m mfxlsx validate program.xlsx --strict        # warnings count as errors
-python -m mfxlsx validate program.xlsx --names my-exercises.txt   # also check exercise names
+python -m mfxlsx validate program.xlsx --known         # also check names against names seen in real exports
+python -m mfxlsx validate program.xlsx --names my-exercises.txt   # ...or against your own list
 python -m mfxlsx dump program.xlsx > program.json      # program as JSON (per-cycle targets)
 python -m mfxlsx build program.json -o program.xlsx    # JSON to importable file (refuses invalid input)
+python -m mfxlsx compare sent.xlsx reexport.xlsx      # what the app changed when it imported your file
 python -m mfxlsx rules                                 # the rule table
 ```
 
@@ -69,12 +71,13 @@ The suite covers:
 - **Valid programs:** 12 varied programs (effort ramps, 5 sets, uneven set counts, 2- and 3-exercise supersets, per-cycle notes, multiple gyms, two blocks, Unicode) that must survive a write-and-read round trip unchanged.
 - **The 14-file import test pack:** no errors, and exactly the warnings each test is meant to probe.
 - **Broken files:** 49 mutations of real exports, one per rule.
+- **Real round trip:** `compare` on a file the app imported and re-exported finds exactly the known changes.
 - **Coverage:** a check that every rule is exercised and that FORMAT.md's rule table is in sync.
 
 When the real app contradicts a rule, update [`mfxlsx/versions.py`](mfxlsx/versions.py) or `RULES` in [`mfxlsx/reader.py`](mfxlsx/reader.py), along with the matching test case and `tests/RESULTS.md`.
 
 ## Contributing
-Run the pack against your app version (`python tests/build_pack.py --gym "<your gym>"`), then add your results to `tests/RESULTS.md` with the app version and platform.
+Run the pack against your app version (`python tests/build_pack.py --gym "<your gym>"`). For each file that imports, re-export it and run `compare`. Add the results to `tests/RESULTS.md` with the app version and platform, and any new names or aliases to `mfxlsx/data/`.
 
 Not affiliated with or endorsed by MacroFactor or Stronger By Science.
 

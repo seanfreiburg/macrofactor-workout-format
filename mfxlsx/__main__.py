@@ -1,9 +1,10 @@
 """Command line: validate, dump, and build MacroFactor program files.
 
-  python -m mfxlsx validate FILE.xlsx [--strict] [--names exercises.txt]
+  python -m mfxlsx validate FILE.xlsx [--strict] [--known] [--names exercises.txt]
   python -m mfxlsx dump FILE.xlsx            # program as JSON (per-cycle targets)
   python -m mfxlsx build PROGRAM.json -o OUT.xlsx [--strict]
   python -m mfxlsx rules                     # validation rules as a Markdown table
+  python -m mfxlsx compare SENT.xlsx REEXPORT.xlsx   # what the app changed on import
 """
 import argparse
 import json
@@ -12,11 +13,10 @@ import sys
 from . import APP_LABEL, from_dict, read, read_workbook, to_workbook
 
 
-def _names(path):
-    if not path:
-        return None
-    with open(path, encoding="utf-8") as f:
-        return [line.strip() for line in f if line.strip()]
+def _names(path, known=False):
+    from .names import known_names, load_names
+    names = (load_names(path) if path else []) + (known_names() if known else [])
+    return names or None
 
 
 def _report(res, strict):
@@ -35,6 +35,7 @@ def main(argv=None):
     v.add_argument("file")
     v.add_argument("--strict", action="store_true", help="treat warnings as errors")
     v.add_argument("--names", help="text file of valid exercise names, one per line")
+    v.add_argument("--known", action="store_true", help="also check names against the bundled list from real exports")
     d = sub.add_parser("dump")
     d.add_argument("file")
     b = sub.add_parser("build")
@@ -42,16 +43,32 @@ def main(argv=None):
     b.add_argument("-o", "--out", required=True)
     b.add_argument("--strict", action="store_true")
     b.add_argument("--names")
+    b.add_argument("--known", action="store_true")
     sub.add_parser("rules")
+    c = sub.add_parser("compare")
+    c.add_argument("sent")
+    c.add_argument("reexport")
     a = ap.parse_args(argv)
 
+    if a.cmd == "compare":
+        from .compare import aliases, compare_files
+        changes = compare_files(a.sent, a.reexport)
+        for ch in changes:
+            print(ch)
+        al = aliases(changes)
+        if al:
+            print("\nexercise aliases (sent -> app name):")
+            for k, v in al.items():
+                print(f"  {k}\t{v}")
+        print(f"\n{len(changes)} difference(s)" if changes else "identical: the app kept everything")
+        return 0
     if a.cmd == "rules":
         from .reader import rules_markdown
         print(rules_markdown())
         return 0
 
     if a.cmd == "validate":
-        return _report(read(a.file, _names(a.names)), a.strict)
+        return _report(read(a.file, _names(a.names, a.known)), a.strict)
     if a.cmd == "dump":
         res = read(a.file)
         if res.program is None:
@@ -62,7 +79,7 @@ def main(argv=None):
     with open(a.json, encoding="utf-8") as f:
         program = from_dict(json.load(f))
     wb = to_workbook(program)
-    res = read_workbook(wb, _names(a.names))
+    res = read_workbook(wb, _names(a.names, a.known))
     if not res.ok(a.strict):
         _report(res, a.strict)
         print("not written", file=sys.stderr)

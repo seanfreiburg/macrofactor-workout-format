@@ -85,6 +85,8 @@ The members are adjacent rows. Exports so far show `SS1` only, so numbering acro
 - Import fails if a name isn't recognized (per MacroFactor's help page). The app's exercise database uses sentence case ("Bent-over cable fly"); exports use Title Case. Matching appears to be case-insensitive.
 - **Alternative names are accepted and mapped to the canonical exercise.** An import containing `Reverse Cable Crossover` re-exported as `Bent-Over Cable Fly`. **[confirmed]**
 - Custom exercises in the importing account can be used by name. **[confirmed]**
+- `mfxlsx/data/exercise-names.txt` lists every name seen in a real export, spelled exactly as the app wrote it. `--known` checks files against it. Some may be custom exercises in the exporting account, and those are marked.
+- `mfxlsx/data/exercise-aliases.tsv` lists names the app accepted and rewrote. Find more by importing a file, re-exporting it, and running `python -m mfxlsx compare`.
 
 ## Other spreadsheet styles
 The importer's strings include patterns for `week <n>`, `block <n>`, `sets <a>-<b>: ...`, `topset:` / `back off:`, and `... / week spreadsheet`. So it may also parse coach-style program spreadsheets. **[candidate]**
