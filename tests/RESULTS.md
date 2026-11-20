@@ -1,0 +1,23 @@
+# Import test results
+
+Build the pack: `python tests/build_pack.py --gym "<your gym name>" --out pack/`.
+Import each file in MacroFactor Workouts (+ > New Program > Import From File), record what happens, then delete the test program.
+
+App version: MacroFactor Workouts 1.4.5 (Android)
+
+| Test | Question | Result | What the app showed |
+|---|---|---|---|
+| T00 Baseline | Control: 2 cycles, one training day, six rest days | | |
+| T01 Set types | Are Drop Set, Myo Set, Failure Set, Warm-Up Set accepted? | | |
+| T02 Rest as seconds | Is Rest an integer number of seconds (90, 150)? | | |
+| T03 Rest as m:ss | Is Rest accepted as text `1:30`? | | |
+| T04 Duration/Distance | Are `Set k Duration` / `Set k Distance` columns accepted? | | |
+| T05 Deload First Cycle | Is `Deload: First Cycle` valid? | | |
+| T06 Deload None | Is `Deload: None` valid? | | |
+| T07 Color/Icon | Are `Color: Teal`, `Icon: Chess Knight` valid? | | |
+| T08 Two blocks | Is a second `Block 2` section accepted, and how does it appear? | | |
+| T09 Supersets | SS1 and SS2 on one day, a 3-exercise superset, numbering restarting per day | | |
+| T10 Sets/reps | 4 sets in one exercise; single rep target `10` | | |
+| T11 Skipped/RIR | `Skipped: Yes`; RIR left blank | | |
+| T12 Unknown exercise | What error does an unknown name give? (expected to fail) | | |
+| T13 Unknown gym | What happens with a gym name that doesn't exist? | | |

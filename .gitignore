@@ -1,0 +1,4 @@
+pack/
+tests/pack/
+__pycache__/
+*.pyc
