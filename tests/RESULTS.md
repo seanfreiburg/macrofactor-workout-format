@@ -8,7 +8,7 @@ App version: MacroFactor Workouts 1.4.5 (Android, com.sbs.train, version code 16
 | Test | Question | Result | What the app showed |
 |---|---|---|---|
 | T00 Baseline | Control: 2 cycles, one training day, six rest days | **Pass** (2026-11-20) | Imported. Cycles shown as "Week 1" and "Week 2"; day tabs Monday + Rest ×6; sets "8–12 reps" with RIR badge 2. Cycle counts other than 6 are accepted. Target Muscles showed 1.7 sets/exercise (probably a weekly average including the deload cycle). |
-| T01 Set types | Are Drop Set, Myo Set, Failure Set, Warm-Up Set accepted? | | |
+| T01 Set types | Are Drop Set, Myo Set, Failure Set, Warm-Up Set accepted? | **Pass** (2026-11-20) | All four accepted. Badges: D (drop), M (myo), F (failure), W (warm-up). The drop set's range `8 - 12` displayed as "8 reps" (low end only); the others kept their range. Re-export pending to see how drop sets are stored. |
 | T02 Rest as seconds | Is Rest an integer number of seconds (90, 150)? | | |
 | T03 Rest as m:ss | Is Rest accepted as text `1:30`? | | |
 | T04 Duration/Distance | Are `Set k Duration` / `Set k Distance` columns accepted? | | |

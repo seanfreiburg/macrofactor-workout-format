@@ -64,7 +64,7 @@ The importer matches set headers with `Set <k> (Type|Rep Range|RIR|Rest|Duration
 | B Exercise | Exercise name as MacroFactor knows it. Custom exercises use their custom name. See *Exercise names*. |
 | C Skipped | `No` (`Yes` untested) |
 | D Notes | Free text, or empty |
-| Set k Type | `Standard Set` **[confirmed]**; `Drop Set`, `Myo Set`, `Failure Set` **[candidate]** |
+| Set k Type | `Standard Set`, `Drop Set`, `Myo Set`, `Failure Set`, `Warm-Up Set` **[tested T01]**. A drop set shows only the low end of its rep range (`8 - 12` → "8 reps"). |
 | Set k Rep Range | `"<low> - <high>"` with spaces, for example `8 - 12`. A single target like `10` is untested. |
 | Set k RIR | Integer |
 | Set k Rest | Empty in every export so far. Format untested. |

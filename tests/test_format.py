@@ -130,7 +130,7 @@ def test_writer_refuses_invalid_program(tmp_path):
 # 3. Import test pack: no errors; warnings flag exactly what each test asks ------------
 
 PACK_EXPECTED_WARNINGS = {
-    "T00": set(), "T01": {"value_candidate", "value_unknown"}, "T02": {"rest_untested"}, "T03": {"rest_untested"},
+    "T00": set(), "T01": set(), "T02": {"rest_untested"}, "T03": {"rest_untested"},
     "T04": {"header_set_fields", "duration_distance_untested"}, "T05": {"value_candidate"},
     "T06": {"value_candidate"}, "T07": {"value_candidate"}, "T08": set(), "T09": set(), "T10": {"rep_single"},
     "T11": {"rir_missing", "skipped_yes"}, "T12": set(), "T13": set(),

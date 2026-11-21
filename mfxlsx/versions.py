@@ -19,11 +19,11 @@ CONFIRMED = {
     "Deload": {"Last Cycle"},
     "Color": {"Orange"},
     "Icon": {"Chess Queen"},
-    "Set Type": {"Standard Set"},
+    "Set Type": {"Standard Set", "Drop Set", "Myo Set", "Failure Set", "Warm-Up Set"},  # T01
 }
 CANDIDATE = {
     "Deload": {"First Cycle", "None"},
     "Color": {"Red", "Yellow", "Green", "Teal", "Blue", "Purple"},
     "Icon": {"Chess King", "Chess King 2", "Chess Rook", "Chess Bishop", "Chess Bishop 2", "Chess Knight", "Chess Pawn"},
-    "Set Type": {"Drop Set", "Myo Set", "Failure Set"},
+    "Set Type": set(),
 }
