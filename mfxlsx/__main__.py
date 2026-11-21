@@ -52,7 +52,11 @@ def main(argv=None):
 
     if a.cmd == "compare":
         from .compare import aliases, compare_files
-        changes = compare_files(a.sent, a.reexport)
+        try:
+            changes = compare_files(a.sent, a.reexport)
+        except ValueError as e:
+            print(e, file=sys.stderr)
+            return 1
         for ch in changes:
             print(ch)
         al = aliases(changes)

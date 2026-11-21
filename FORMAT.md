@@ -65,8 +65,8 @@ The importer matches set headers with `Set <k> (Type|Rep Range|RIR|Rest|Duration
 | C Skipped | `No` (`Yes` untested) |
 | D Notes | Free text, or empty |
 | Set k Type | `Standard Set`, `Drop Set`, `Myo Set`, `Failure Set`, `Warm-Up Set` **[tested T01]**. A drop set shows only the low end of its rep range (`8 - 12` → "8 reps"). |
-| Set k Rep Range | `"<low> - <high>"` with spaces, for example `8 - 12`. A single target like `10` is untested. |
-| Set k RIR | Integer |
+| Set k Rep Range | `"<low> - <high>"` with spaces, for example `8 - 12`. Min may equal max: drop sets export as `8 - 8` **[tested T01]**. A single target like `10` is untested. |
+| Set k RIR | Integer. Drop sets export it as text `X (Y)`, for example `0 (0)`; a plain integer also imports **[tested T01]**. The meaning of Y is unconfirmed. |
 | Set k Rest | Empty in every export so far. Format untested. |
 
 Unused set columns stay empty. An exercise with fewer sets than the maximum leaves the later groups blank.
@@ -136,10 +136,13 @@ The importer's strings include patterns for `week <n>`, `block <n>`, `sets <a>-<
 | `set_no_type` | error | a set with values must have a Type |
 | `rep_range_format` | warning | exports write ranges as '<low> - <high>' with single spaces |
 | `rep_range_invalid` | error | rep range must be '<low> - <high>' or a single number |
-| `rep_range_order` | error | app string: 'Reps Max must be higher than Reps Min' |
+| `rep_range_order` | error | reversed range (max below min); app string: 'Reps Max must be higher than Reps Min' |
+| `drop_set_range` | warning | the app keeps only the low end of a drop set's range ('8 - 12' became '8 - 8', T01); write 'N - N' |
+| `rep_range_equal` | warning | min = max: exports write drop sets this way ('8 - 8', T01 re-export); untested on other set types |
 | `rep_single` | warning | single rep target untested |
 | `reps_missing` | warning | exports always give a rep range |
-| `rir_invalid` | error | RIR is a whole number >= 0 (numeric cell in exports) |
+| `rir_invalid` | error | RIR is a whole number >= 0, or 'X (Y)' text as exports write for drop sets |
+| `rir_pair_untested` | warning | 'X (Y)' RIR is exported for drop sets (T01); meaning of Y and use on other set types untested |
 | `rir_high` | warning | RIR above 10 is unusual |
 | `rir_missing` | warning | blank RIR untested |
 | `rest_untested` | warning | exports leave Rest empty; value formats untested |

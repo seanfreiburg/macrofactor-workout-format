@@ -122,7 +122,7 @@ def test_valid_program_round_trip(name, tmp_path):
 
 
 def test_writer_refuses_invalid_program(tmp_path):
-    bad = Program("Bad", 1, days=[Day("Monday", [Exercise("Low Incline Dumbbell Press", [Set(reps="12 - 8", rir=1)])])])
+    bad = Program("Bad", 1, days=[Day("Monday", [Exercise("Low Incline Dumbbell Press", [Set(reps="12 - 8", rir=1)])])])  # reversed
     with pytest.raises(ValueError, match="rep_range_order"):
         write(bad, tmp_path / "bad.xlsx")
 
@@ -130,7 +130,7 @@ def test_writer_refuses_invalid_program(tmp_path):
 # 3. Import test pack: no errors; warnings flag exactly what each test asks ------------
 
 PACK_EXPECTED_WARNINGS = {
-    "T00": set(), "T01": set(), "T02": {"rest_untested"}, "T03": {"rest_untested"},
+    "T00": set(), "T01": {"drop_set_range"}, "T02": {"rest_untested"}, "T03": {"rest_untested"},
     "T04": {"header_set_fields", "duration_distance_untested"}, "T05": {"value_candidate"},
     "T06": {"value_candidate"}, "T07": {"value_candidate"}, "T08": set(), "T09": set(), "T10": {"rep_single"},
     "T11": {"rir_missing", "skipped_yes"}, "T12": set(), "T13": set(),
@@ -205,7 +205,9 @@ BROKEN = [
     ("rep_range_en_dash", FIVE_DAY, set_cells(F4="10 – 20"), "rep_range_format"),
     ("rep_range_invalid", FIVE_DAY, set_cells(F4="ten to twenty"), "rep_range_invalid"),
     ("rep_range_reversed", FIVE_DAY, set_cells(F4="20 - 10"), "rep_range_order"),
-    ("rep_range_equal", FIVE_DAY, set_cells(F4="10 - 10"), "rep_range_order"),
+    ("rep_range_equal", FIVE_DAY, set_cells(F4="10 - 10"), "rep_range_equal"),
+    ("rir_pair_on_standard_set", FIVE_DAY, set_cells(G4="1 (0)"), "rir_pair_untested"),
+    ("rir_pair_malformed", FIVE_DAY, set_cells(G4="1 (x)"), "rir_invalid"),
     ("rep_range_reversed_loose", FIVE_DAY, set_cells(F4="20-10"), "rep_range_order"),
     ("rep_single", FIVE_DAY, set_cells(F4="10"), "rep_single"),
     ("reps_missing", FIVE_DAY, set_cells(F4=None), "reps_missing"),

@@ -75,3 +75,23 @@ def test_names_file_ignores_comments():
     names = load_names(DATA / "exercise-names.txt")
     assert all("#" not in n and n == n.strip() and not n.startswith("Cycles:") for n in names)
     assert "Neutral Grip Cable Row" in names
+
+
+def test_t01_round_trip_drop_set():
+    """T01 imported on 1.4.5 Android. The app kept every set type, but stored the drop set's
+    '8 - 12' as '8 - 8' and its RIR 0 as the text '0 (0)'."""
+    reexport = RT / "t01-set-types-reexport.xlsx"
+    assert read(reexport).issues == []
+    changes = compare_files(RT / "t01-set-types-sent.xlsx", reexport)
+    assert sorted((c.field, c.sent, c.exported, tuple(c.cycles)) for c in changes) == [
+        ("set 2 reps", "8 - 12", "8 - 8", (1, 2)),
+        ("set 2 rir", 0, "0 (0)", (1, 2)),
+    ]
+
+
+def test_drop_set_written_like_the_app_round_trips_clean(tmp_path):
+    from mfxlsx import Day, Exercise, Program, Set, write
+    p = Program("Drop", 2, days=[Day("Monday", [Exercise("Low Incline Dumbbell Press", [
+        Set("Standard Set", "8 - 12", 2), Set("Drop Set", "8 - 8", "0 (0)")])])])
+    write(p, tmp_path / "d.xlsx")
+    assert read(tmp_path / "d.xlsx").issues == []
