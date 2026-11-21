@@ -80,7 +80,9 @@ A drop set is a main part plus one or more drops, each with its own reps and RIR
 - Each drop adds ` (<low> - <high>)` to the rep range and ` (<rir>)` to the RIR.
 - A single rep target exports as `N - N`.
 - Importing a plain `8 - 12` with RIR `0` works, but the app keeps only the low end (`8 - 8`) and writes RIR as `0 (0)`.
-- How several drops are written is unconfirmed.
+- Both rows have an optional max in the editor. A blank max exports as `N - N`.
+- Confirmed against the in-app editor (D row 6 @ RIR 1, drop row 4 @ RIR 2 ⇄ `6 - 6 (4 - 4)` / `1 (2)`).
+- Whether a drop set can have more than one drop, and how that would be written, is unconfirmed.
 
 Unused set columns stay empty. An exercise with fewer sets than the maximum leaves the later groups blank.
 
