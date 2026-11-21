@@ -130,7 +130,7 @@ def test_writer_refuses_invalid_program(tmp_path):
 # 3. Import test pack: no errors; warnings flag exactly what each test asks ------------
 
 PACK_EXPECTED_WARNINGS = {
-    "T00": set(), "T01": {"drop_set_range"}, "T02": {"rest_untested"}, "T03": {"rest_untested"},
+    "T00": set(), "T01": {"drop_set_range"}, "T02": set(), "T03": {"rest_untested"},
     "T04": {"header_set_fields", "duration_distance_untested"}, "T05": {"value_candidate"},
     "T06": {"value_candidate"}, "T07": {"value_candidate"}, "T08": set(), "T09": set(), "T10": {"rep_single"},
     "T11": {"rir_missing", "skipped_yes"}, "T12": set(), "T13": set(),
@@ -208,6 +208,10 @@ BROKEN = [
     ("rep_range_equal", FIVE_DAY, set_cells(F4="10 - 10"), "rep_range_equal"),
     ("rir_pair_on_standard_set", FIVE_DAY, set_cells(G4="1 (0)"), "rir_pair_untested"),
     ("rir_pair_malformed", FIVE_DAY, set_cells(G4="1 (x)"), "rir_invalid"),
+    ("drop_syntax_on_standard_set", FIVE_DAY, set_cells(F4="8 - 8 (4 - 4)"), "drop_syntax"),
+    ("drop_count_mismatch", FIVE_DAY, set_cells(E4="Drop Set", F4="6 - 6 (4 - 4)", G4="1 (2) (3)"), "drop_count_mismatch"),
+    ("drop_multi", FIVE_DAY, set_cells(E4="Drop Set", F4="6 - 6 (4 - 4) (2 - 2)", G4="1 (2) (3)"), "drop_multi_untested"),
+    ("drop_reversed", FIVE_DAY, set_cells(E4="Drop Set", F4="6 - 6 (4 - 2)", G4="1 (2)"), "rep_range_order"),
     ("rep_range_reversed_loose", FIVE_DAY, set_cells(F4="20-10"), "rep_range_order"),
     ("rep_single", FIVE_DAY, set_cells(F4="10"), "rep_single"),
     ("reps_missing", FIVE_DAY, set_cells(F4=None), "reps_missing"),
@@ -216,7 +220,9 @@ BROKEN = [
     ("rir_fraction", FIVE_DAY, set_cells(G4=1.5), "rir_invalid"),
     ("rir_high", FIVE_DAY, set_cells(G4=12), "rir_high"),
     ("rir_missing", FIVE_DAY, set_cells(G4=None), "rir_missing"),
-    ("rest_untested", FIVE_DAY, set_cells(H4=90), "rest_untested"),
+    ("rest_text", FIVE_DAY, set_cells(H4="1:30"), "rest_untested"),
+    ("rest_negative", FIVE_DAY, set_cells(H4=-30), "rest_invalid"),
+    ("rest_fraction", FIVE_DAY, set_cells(H4=90.5), "rest_invalid"),
     ("values_past_last_set", FIVE_DAY, set_cells(M4="x"), "row_unrecognized"),
 ]
 

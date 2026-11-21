@@ -95,3 +95,13 @@ def test_drop_set_written_like_the_app_round_trips_clean(tmp_path):
         Set("Standard Set", "8 - 12", 2), Set("Drop Set", "8 - 8", "0 (0)")])])])
     write(p, tmp_path / "d.xlsx")
     assert read(tmp_path / "d.xlsx").issues == []
+
+
+def test_t01_drop_set_edited_in_app_is_valid():
+    """T01 after editing the drop set in the app: main part and drop share one cell each,
+    reps '6 - 6 (4 - 4)' and RIR '1 (2)'."""
+    res = read(RT / "t01-drop-set-edited-export.xlsx")
+    assert res.issues == []
+    press = res.program.all_blocks()[0].days[0].exercises[0]
+    drop = press.cycle(1).sets[1]
+    assert (drop.type, drop.reps, drop.rir) == ("Drop Set", "6 - 6 (4 - 4)", "1 (2)")

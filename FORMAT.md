@@ -66,8 +66,21 @@ The importer matches set headers with `Set <k> (Type|Rep Range|RIR|Rest|Duration
 | D Notes | Free text, or empty |
 | Set k Type | `Standard Set`, `Drop Set`, `Myo Set`, `Failure Set`, `Warm-Up Set` **[tested T01]**. A drop set shows only the low end of its rep range (`8 - 12` → "8 reps"). |
 | Set k Rep Range | `"<low> - <high>"` with spaces, for example `8 - 12`. Min may equal max: drop sets export as `8 - 8` **[tested T01]**. A single target like `10` is untested. |
-| Set k RIR | Integer. Drop sets export it as text `X (Y)`, for example `0 (0)`; a plain integer also imports **[tested T01]**. The meaning of Y is unconfirmed. |
-| Set k Rest | Empty in every export so far. Format untested. |
+| Set k RIR | Integer. Drop sets: see *Drop sets* below. |
+| Set k Rest | Whole seconds as a number (`90` = 1:30), or empty for the exercise's default **[tested T02]**: the app stored them unchanged. Text like `1:30` is untested (T03). |
+
+### Drop sets [tested T01]
+A drop set is a main part plus one or more drops, each with its own reps and RIR. In the app's editor the main part is the **D** row and each drop is a row under it. Both live in the set's two usual cells:
+
+| | Rep Range | RIR |
+|---|---|---|
+| Main part only (drop reps empty) | `8 - 8` | `0 (0)` |
+| Main 6 reps at RIR 1, one drop of 4 reps at RIR 2 | `6 - 6 (4 - 4)` | `1 (2)` |
+
+- Each drop adds ` (<low> - <high>)` to the rep range and ` (<rir>)` to the RIR.
+- A single rep target exports as `N - N`.
+- Importing a plain `8 - 12` with RIR `0` works, but the app keeps only the low end (`8 - 8`) and writes RIR as `0 (0)`.
+- How several drops are written is unconfirmed.
 
 Unused set columns stay empty. An exercise with fewer sets than the maximum leaves the later groups blank.
 
@@ -138,6 +151,9 @@ The importer's strings include patterns for `week <n>`, `block <n>`, `sets <a>-<
 | `rep_range_invalid` | error | rep range must be '<low> - <high>' or a single number |
 | `rep_range_order` | error | reversed range (max below min); app string: 'Reps Max must be higher than Reps Min' |
 | `drop_set_range` | warning | the app keeps only the low end of a drop set's range ('8 - 12' became '8 - 8', T01); write 'N - N' |
+| `drop_syntax` | warning | '<main> (<drop>)' rep/RIR syntax is exported for Drop Sets (T01 edit); on other set types untested |
+| `drop_count_mismatch` | warning | rep range and RIR list different numbers of drops |
+| `drop_multi_untested` | warning | more than one drop: the export syntax for several drops is unconfirmed |
 | `rep_range_equal` | warning | min = max: exports write drop sets this way ('8 - 8', T01 re-export); untested on other set types |
 | `rep_single` | warning | single rep target untested |
 | `reps_missing` | warning | exports always give a rep range |
@@ -145,7 +161,8 @@ The importer's strings include patterns for `week <n>`, `block <n>`, `sets <a>-<
 | `rir_pair_untested` | warning | 'X (Y)' RIR is exported for drop sets (T01); meaning of Y and use on other set types untested |
 | `rir_high` | warning | RIR above 10 is unusual |
 | `rir_missing` | warning | blank RIR untested |
-| `rest_untested` | warning | exports leave Rest empty; value formats untested |
+| `rest_invalid` | error | Rest is whole seconds >= 0 (T02: 90 and 150 round-trip unchanged) |
+| `rest_untested` | warning | Rest given as text (e.g. '1:30'); only whole seconds are confirmed (T02) |
 | `duration_distance_untested` | warning | Duration/Distance values untested |
 <!-- rules:end -->
 

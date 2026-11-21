@@ -23,7 +23,8 @@ SET_HEADER = re.compile(r"^Set\s+(\d+)\s+(Type|Rep Range|RIR|Rest|Duration|Dista
 SUPERSET = re.compile(r"^(.*?) ∈ SS(\d+)$")
 LOOKALIKE_SUPERSET = re.compile(r"\s(?:∈|€|ε|e|in|E)\s*SS\s*\d+\s*$|\bSS\d+\s*$")
 REP_RANGE = re.compile(r"^(\d+) - (\d+)$")
-RIR_PAIR = re.compile(r"^(\d+) \((\d+)\)$")
+RIR_PAIR = re.compile(r"^(\d+)((?: \(\d+\))+)$")  # drop set: "<main RIR> (<drop RIR>)..."
+REP_DROPS = re.compile(r"^(\d+) - (\d+)((?: \(\d+ - \d+\))+)$")  # drop set: "<main> (<drop>)..."
 REP_RANGE_LOOSE = re.compile(r"^\s*(\d+)\s*[-–]\s*(\d+)\s*$")
 META = re.compile(r"^(Program|Cycles|Deload|Color|Icon):\s?(.*)$")
 BLOCK = re.compile(r"^Block (\d+)$")
@@ -71,6 +72,9 @@ RULES = {
     "rep_range_invalid": ("error", "rep range must be '<low> - <high>' or a single number"),
     "rep_range_order": ("error", "reversed range (max below min); app string: 'Reps Max must be higher than Reps Min'"),
     "drop_set_range": ("warning", "the app keeps only the low end of a drop set's range ('8 - 12' became '8 - 8', T01); write 'N - N'"),
+    "drop_syntax": ("warning", "'<main> (<drop>)' rep/RIR syntax is exported for Drop Sets (T01 edit); on other set types untested"),
+    "drop_count_mismatch": ("warning", "rep range and RIR list different numbers of drops"),
+    "drop_multi_untested": ("warning", "more than one drop: the export syntax for several drops is unconfirmed"),
     "rep_range_equal": ("warning", "min = max: exports write drop sets this way ('8 - 8', T01 re-export); untested on other set types"),
     "rep_single": ("warning", "single rep target untested"),
     "reps_missing": ("warning", "exports always give a rep range"),
@@ -78,7 +82,8 @@ RULES = {
     "rir_pair_untested": ("warning", "'X (Y)' RIR is exported for drop sets (T01); meaning of Y and use on other set types untested"),
     "rir_high": ("warning", "RIR above 10 is unusual"),
     "rir_missing": ("warning", "blank RIR untested"),
-    "rest_untested": ("warning", "exports leave Rest empty; value formats untested"),
+    "rest_invalid": ("error", "Rest is whole seconds >= 0 (T02: 90 and 150 round-trip unchanged)"),
+    "rest_untested": ("warning", "Rest given as text (e.g. '1:30'); only whole seconds are confirmed (T02)"),
     "duration_distance_untested": ("warning", "Duration/Distance values untested"),
 }
 
@@ -344,8 +349,22 @@ def _parse_set(ctx, vals, i, k):
         ctx.add("reps_missing", f"Set {k} has no rep range", i)
     else:
         s = str(reps)
-        m = REP_RANGE.match(s)
-        if m:
+        md = REP_DROPS.match(s)
+        if md:
+            n_rep_drops = md.group(3).count("(")
+            if t != "Drop Set":
+                ctx.add("drop_syntax", f"Set {k} rep range {s!r} uses drop syntax on a {t!r}", i)
+            if n_rep_drops > 1:
+                ctx.add("drop_multi_untested", f"Set {k} has {n_rep_drops} drops", i)
+            for lo, hi in re.findall(r"(\d+) - (\d+)", s):
+                if int(hi) < int(lo):
+                    ctx.add("rep_range_order", f"Set {k} rep range {s!r}: max is below min", i)
+            if isinstance(rir, str) and RIR_PAIR.match(rir) and RIR_PAIR.match(rir).group(2).count("(") != n_rep_drops:
+                ctx.add("drop_count_mismatch", f"Set {k} rep range {s!r} vs RIR {rir!r}", i)
+        m = None if md else REP_RANGE.match(s)
+        if md:
+            pass
+        elif m:
             lo, hi = int(m.group(1)), int(m.group(2))
             if hi < lo:
                 ctx.add("rep_range_order", f"Set {k} rep range {s!r}: max is below min", i)
@@ -367,12 +386,18 @@ def _parse_set(ctx, vals, i, k):
     elif isinstance(rir, str) and RIR_PAIR.match(rir):
         if t != "Drop Set":
             ctx.add("rir_pair_untested", f"Set {k} RIR {rir!r} on a {t!r}", i)
+        if RIR_PAIR.match(rir).group(2).count("(") > 1 and not (reps and REP_DROPS.match(str(reps))):
+            ctx.add("drop_multi_untested", f"Set {k} RIR {rir!r} lists several drops", i)
     elif isinstance(rir, bool) or not isinstance(rir, (int, float)) or rir < 0 or rir != int(rir):
         ctx.add("rir_invalid", f"Set {k} RIR {rir!r}", i)
     elif rir > 10:
         ctx.add("rir_high", f"Set {k} RIR {rir}", i)
-    if vals.get("Rest") is not None:
-        ctx.add("rest_untested", f"Set {k} Rest {vals['Rest']!r}", i)
+    rest = vals.get("Rest")
+    if rest is not None:
+        if isinstance(rest, bool) or (isinstance(rest, (int, float)) and (rest < 0 or rest != int(rest))):
+            ctx.add("rest_invalid", f"Set {k} Rest {rest!r}", i)
+        elif not isinstance(rest, (int, float)):
+            ctx.add("rest_untested", f"Set {k} Rest {rest!r}", i)
     if vals.get("Duration") is not None or vals.get("Distance") is not None:
         ctx.add("duration_distance_untested", f"Set {k} Duration/Distance values", i)
     return Set(type=t, reps=reps, rir=int(rir) if isinstance(rir, (int, float)) and not isinstance(rir, bool) and rir == int(rir) else rir,
