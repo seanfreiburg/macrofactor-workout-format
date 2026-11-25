@@ -55,7 +55,8 @@ The importer matches set headers with `Set <k> (Type|Rep Range|RIR|Rest|Duration
 - A training day starts with `<Day> @ <Gym>` in column A (for example `Monday @ Home Gym`). The cell is merged down over that day's exercise rows and top-aligned.
 - `<Gym>` is the name of a gym profile in the app. Whether an unknown gym is accepted is untested.
 - A rest day is one row with `Rest` in column A.
-- Days appear in order. Exports use weekday names, one row group per day of the week.
+- Days appear in order, one row group per day. Exports usually use weekday names; a program with custom day names exports them as written (`Lower A @ <Gym>`, `Upper A @ <Gym>`, seen 2026-11-25).
+- Exports put the account holder's name in the file metadata (`docProps/core.xml`, `dc:creator`). The app ignores it on import as far as we know; strip it before sharing a file.
 
 ### Exercise rows [confirmed]
 
@@ -65,7 +66,7 @@ The importer matches set headers with `Set <k> (Type|Rep Range|RIR|Rest|Duration
 | C Skipped | `No` (`Yes` untested) |
 | D Notes | Free text, or empty |
 | Set k Type | `Standard Set`, `Drop Set`, `Myo Set`, `Failure Set`, `Warm-Up Set` **[tested T01]**. A drop set shows only the low end of its rep range (`8 - 12` → "8 reps"). |
-| Set k Rep Range | `"<low> - <high>"` with spaces, for example `8 - 12`. Min may equal max: drop sets export as `8 - 8` **[tested T01]**. A single target like `10` is untested. |
+| Set k Rep Range | `"<low> - <high>"` with spaces, for example `8 - 12`. Min may equal max: a drop set, or any set whose max is left blank, exports as `8 - 8` **[tested T01; seen on Standard Sets in a real export]**. A Failure Set with no max exports open-ended as `6+` **[seen in a real export, 2026-11-25]**; `<n>+` on other set types is untested. A single target like `10` is untested. |
 | Set k RIR | Integer. Drop sets: see *Drop sets* below. |
 | Set k Rest | Whole seconds as a number (`90` = 1:30), or empty for the exercise's default **[tested T02]**: the app stored them unchanged. Text like `1:30` is untested (T03). |
 
@@ -150,13 +151,13 @@ The importer's strings include patterns for `week <n>`, `block <n>`, `sets <a>-<
 | `set_gap` | error | set groups are filled from Set 1 with no gaps |
 | `set_no_type` | error | a set with values must have a Type |
 | `rep_range_format` | warning | exports write ranges as '<low> - <high>' with single spaces |
-| `rep_range_invalid` | error | rep range must be '<low> - <high>' or a single number |
+| `rep_range_invalid` | error | rep range must be '<low> - <high>', '<low>+' or a single number |
 | `rep_range_order` | error | reversed range (max below min); app string: 'Reps Max must be higher than Reps Min' |
 | `drop_set_range` | warning | the app keeps only the low end of a drop set's range ('8 - 12' became '8 - 8', T01); write 'N - N' |
 | `drop_syntax` | warning | '<main> (<drop>)' rep/RIR syntax is exported for Drop Sets (T01 edit); on other set types untested |
 | `drop_count_mismatch` | warning | rep range and RIR list different numbers of drops |
 | `drop_multi_untested` | warning | more than one drop: the export syntax for several drops is unconfirmed |
-| `rep_range_equal` | warning | min = max: exports write drop sets this way ('8 - 8', T01 re-export); untested on other set types |
+| `rep_open_untested` | warning | open-ended '<n>+' range: exports write it on Failure Sets; untested on other set types |
 | `rep_single` | warning | single rep target untested |
 | `reps_missing` | warning | exports always give a rep range |
 | `rir_invalid` | error | RIR is a whole number >= 0, or 'X (Y)' text as exports write for drop sets |

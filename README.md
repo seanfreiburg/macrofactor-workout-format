@@ -6,7 +6,7 @@ An unofficial spec, validator and exporter for the `.xlsx` files that [MacroFact
 |---|---|
 | [FORMAT.md](FORMAT.md) | The format, plus every validation rule and its evidence |
 | [mfxlsx/](mfxlsx/) | Parser/validator, writer, and command line |
-| [examples/](examples/) | Real app exports (gym name replaced) and a JSON program |
+| [examples/](examples/) | Real app exports (gym name replaced, author metadata removed) and a JSON program |
 | [tests/](tests/) | Automated tests, an import test pack for the real app, and results |
 
 ## Tested against
@@ -67,7 +67,7 @@ pip install pytest && python -m pytest tests/
 ```
 
 The suite covers:
-- **Real exports:** both parse with zero issues, the writer reproduces them cell for cell, and they survive a JSON round trip.
+- **Real exports:** all three parse with zero issues, the writer reproduces them cell for cell, and they survive a JSON round trip.
 - **Valid programs:** 12 varied programs (effort ramps, 5 sets, uneven set counts, 2- and 3-exercise supersets, per-cycle notes, multiple gyms, two blocks, Unicode) that must survive a write-and-read round trip unchanged.
 - **The 14-file import test pack:** no errors, and exactly the warnings each test is meant to probe.
 - **Broken files:** 49 mutations of real exports, one per rule.

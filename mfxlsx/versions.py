@@ -11,19 +11,19 @@ APP = {
     "package": "com.sbs.train",
     "version": "1.4.5",
     "version_code": 160,
-    "checked": "2026-11-20",
+    "checked": "2026-11-25",
 }
 APP_LABEL = f"{APP['name']} {APP['version']} ({APP['platform']}, {APP['package']}, version code {APP['version_code']})"
 
 CONFIRMED = {
     "Deload": {"Last Cycle"},
-    "Color": {"Orange"},
-    "Icon": {"Chess Queen"},
+    "Color": {"Orange", "Green"},
+    "Icon": {"Chess Queen", "Rocket"},
     "Set Type": {"Standard Set", "Drop Set", "Myo Set", "Failure Set", "Warm-Up Set"},  # T01
 }
 CANDIDATE = {
     "Deload": {"First Cycle", "None"},
-    "Color": {"Red", "Yellow", "Green", "Teal", "Blue", "Purple"},
+    "Color": {"Red", "Yellow", "Teal", "Blue", "Purple"},
     "Icon": {"Chess King", "Chess King 2", "Chess Rook", "Chess Bishop", "Chess Bishop 2", "Chess Knight", "Chess Pawn"},
     "Set Type": set(),
 }

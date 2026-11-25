@@ -23,6 +23,7 @@ SET_HEADER = re.compile(r"^Set\s+(\d+)\s+(Type|Rep Range|RIR|Rest|Duration|Dista
 SUPERSET = re.compile(r"^(.*?) ∈ SS(\d+)$")
 LOOKALIKE_SUPERSET = re.compile(r"\s(?:∈|€|ε|e|in|E)\s*SS\s*\d+\s*$|\bSS\d+\s*$")
 REP_RANGE = re.compile(r"^(\d+) - (\d+)$")
+REP_OPEN = re.compile(r"^(\d+)\+$")  # open-ended: "6+" = at least 6 (exports write this on Failure Sets)
 RIR_PAIR = re.compile(r"^(\d+)((?: \(\d+\))+)$")  # drop set: "<main RIR> (<drop RIR>)..."
 REP_DROPS = re.compile(r"^(\d+) - (\d+)((?: \(\d+ - \d+\))+)$")  # drop set: "<main> (<drop>)..."
 REP_RANGE_LOOSE = re.compile(r"^\s*(\d+)\s*[-–]\s*(\d+)\s*$")
@@ -69,13 +70,13 @@ RULES = {
     "set_gap": ("error", "set groups are filled from Set 1 with no gaps"),
     "set_no_type": ("error", "a set with values must have a Type"),
     "rep_range_format": ("warning", "exports write ranges as '<low> - <high>' with single spaces"),
-    "rep_range_invalid": ("error", "rep range must be '<low> - <high>' or a single number"),
+    "rep_range_invalid": ("error", "rep range must be '<low> - <high>', '<low>+' or a single number"),
     "rep_range_order": ("error", "reversed range (max below min); app string: 'Reps Max must be higher than Reps Min'"),
     "drop_set_range": ("warning", "the app keeps only the low end of a drop set's range ('8 - 12' became '8 - 8', T01); write 'N - N'"),
     "drop_syntax": ("warning", "'<main> (<drop>)' rep/RIR syntax is exported for Drop Sets (T01 edit); on other set types untested"),
     "drop_count_mismatch": ("warning", "rep range and RIR list different numbers of drops"),
     "drop_multi_untested": ("warning", "more than one drop: the export syntax for several drops is unconfirmed"),
-    "rep_range_equal": ("warning", "min = max: exports write drop sets this way ('8 - 8', T01 re-export); untested on other set types"),
+    "rep_open_untested": ("warning", "open-ended '<n>+' range: exports write it on Failure Sets; untested on other set types"),
     "rep_single": ("warning", "single rep target untested"),
     "reps_missing": ("warning", "exports always give a rep range"),
     "rir_invalid": ("error", "RIR is a whole number >= 0, or 'X (Y)' text as exports write for drop sets"),
@@ -370,13 +371,14 @@ def _parse_set(ctx, vals, i, k):
                 ctx.add("rep_range_order", f"Set {k} rep range {s!r}: max is below min", i)
             elif hi > lo and t == "Drop Set":
                 ctx.add("drop_set_range", f"Set {k} drop set range {s!r} will import as '{lo} - {lo}'", i)
-            elif hi == lo and t != "Drop Set":
-                ctx.add("rep_range_equal", f"Set {k} rep range {s!r} has min = max", i)
         elif REP_RANGE_LOOSE.match(s):
             lo, hi = map(int, REP_RANGE_LOOSE.match(s).groups())
             ctx.add("rep_range_format", f"Set {k} rep range {s!r}; exports write '{lo} - {hi}'", i)
             if hi < lo:
                 ctx.add("rep_range_order", f"Set {k} rep range {s!r}: max is below min", i)
+        elif REP_OPEN.match(s):
+            if t != "Failure Set":
+                ctx.add("rep_open_untested", f"Set {k} open-ended rep range {s!r} on a {t!r}", i)
         elif re.fullmatch(r"\d+", s.strip()):
             ctx.add("rep_single", f"Set {k} single rep target {s!r}", i)
         else:

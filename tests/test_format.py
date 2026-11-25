@@ -205,7 +205,7 @@ BROKEN = [
     ("rep_range_en_dash", FIVE_DAY, set_cells(F4="10 – 20"), "rep_range_format"),
     ("rep_range_invalid", FIVE_DAY, set_cells(F4="ten to twenty"), "rep_range_invalid"),
     ("rep_range_reversed", FIVE_DAY, set_cells(F4="20 - 10"), "rep_range_order"),
-    ("rep_range_equal", FIVE_DAY, set_cells(F4="10 - 10"), "rep_range_equal"),
+    ("rep_open_on_standard_set", FIVE_DAY, set_cells(F4="10+"), "rep_open_untested"),
     ("rir_pair_on_standard_set", FIVE_DAY, set_cells(G4="1 (0)"), "rir_pair_untested"),
     ("rir_pair_malformed", FIVE_DAY, set_cells(G4="1 (x)"), "rir_invalid"),
     ("drop_syntax_on_standard_set", FIVE_DAY, set_cells(F4="8 - 8 (4 - 4)"), "drop_syntax"),
@@ -259,3 +259,22 @@ def test_format_md_rules_table_in_sync():
     text = (ROOT / "FORMAT.md").read_text(encoding="utf-8")
     start, end = text.index(FORMAT_RULES_BEGIN) + len(FORMAT_RULES_BEGIN), text.index(FORMAT_RULES_END)
     assert text[start:end].strip() == rules_markdown().strip(), "run: python -m mfxlsx rules > update FORMAT.md"
+
+
+def test_open_ended_and_equal_ranges_are_valid(tmp_path):
+    """Real 6-day export: Failure Sets written as '6+', blank-max Standard Sets as '6 - 6'."""
+    from mfxlsx import Day, Exercise, Program, Set, write
+    p = Program("Open", 2, days=[Day("Monday", [Exercise("Lever-Arm Machine Belt Squat", [
+        Set("Standard Set", "6 - 12", 0), Set("Failure Set", "6+", 0), Set("Standard Set", "6 - 6", 0)])])])
+    write(p, tmp_path / "o.xlsx")
+    res = read(tmp_path / "o.xlsx")
+    assert res.issues == []
+    assert [s.reps for s in res.program.all_blocks()[0].days[0].exercises[0].cycle(1).sets] == ["6 - 12", "6+", "6 - 6"]
+
+
+def test_fixtures_carry_no_author_metadata():
+    """App exports put the account holder's name in docProps/core.xml; fixtures must not."""
+    import zipfile
+    for f in sorted((ROOT / "examples").rglob("*.xlsx")):
+        core = zipfile.ZipFile(f).read("docProps/core.xml").decode()
+        assert "<dc:creator>" not in core and "<cp:lastModifiedBy>" not in core, f.name

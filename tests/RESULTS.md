@@ -22,6 +22,12 @@ App version: MacroFactor Workouts 1.4.5 (Android, com.sbs.train, version code 16
 | T12 Unknown exercise | What error does an unknown name give? (expected to fail) | | |
 | T13 Unknown gym | What happens with a gym name that doesn't exist? | | |
 
+## Real exports
+
+| Date | App | File | What it showed |
+|---|---|---|---|
+| 2026-11-25 | 1.4.5 Android | `examples/export-6day-failure-sets.xlsx` (6 custom-named days, 5 cycles, 3 sets) | A Failure Set with no max exports open-ended as `6+`. A Standard Set with a blank max exports as `6 - 6`, the same as drop sets. Custom day names are exported as written. Color `Green` and Icon `Rocket` are real values. The validator wrongly rejected `6+` and warned on `6 - 6`; both fixed. The export's metadata carries the account holder's name, so it was removed from the fixture. |
+
 ## Confirmed round trips
 
 Files we generated, imported in the app, and exported again. `compare` output is kept in `examples/roundtrip/`.
